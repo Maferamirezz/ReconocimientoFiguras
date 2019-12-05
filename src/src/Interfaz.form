@@ -137,13 +137,7 @@
                 <Component class="javax.swing.JList" name="ListaFormas">
                   <Properties>
                     <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.editors2.ListModelEditor">
-                      <StringArray count="5">
-                        <StringItem index="0" value="Circulo"/>
-                        <StringItem index="1" value="Elipse"/>
-                        <StringItem index="2" value="Cuadradro"/>
-                        <StringItem index="3" value="Rectangulo"/>
-                        <StringItem index="4" value="Triangulo"/>
-                      </StringArray>
+                      <StringArray count="0"/>
                     </Property>
                   </Properties>
                   <Events>

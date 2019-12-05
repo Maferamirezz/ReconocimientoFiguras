@@ -18,17 +18,20 @@ public class neurona {
     private float y;
     private float bias;
     private fActivacion funcion;
+    private ePerceptron entrenador;
     private ArrayList<Float> pesos;
     private ArrayList<Float> entradas;
     private capa sigCapa;
+    private float target;
     
     ///Constructor
-    public neurona(String id, fActivacion funcion, capa sigcapa){
+    public neurona(String id, fActivacion funcion,ePerceptron e, capa sigcapa){
         this.id=id;
         pesos = new ArrayList<>();
         entradas = new ArrayList<>();
-        this.sigCapa = sigcapa;
+        this.sigCapa = sigcapa; 
         this.funcion= funcion;
+        this.entrenador = e;
     }
 
     //Metodos
@@ -63,25 +66,29 @@ public class neurona {
             sigCapa.distribuirEntrada(y);
         }
     }
-    public void imprimirPesos(){
-        System.out.println("Neurona: "+this.id);
-        System.out.println("Bias: "+this.getBias());
-        for (int i = 0; i < pesos.size(); i++) {
-            System.out.println("W"+i+": "+pesos.get(i));
-        }
-    }
-        public void imprimirEntradas(){
-        System.out.println("Neurona: "+this.id);
-        for (int i = 0; i < pesos.size(); i++) {
-            System.out.println(entradas.get(i));
-        }
-    }
     public void CalcularSalida(){
         this.calcularYin();
         this.evaluarYin();
         this.enviarY();
     }
+    public void entrenar(){
+        entrenador.entrenar(this, target);
+    }
     
+    public void imprimirPesos(){
+        System.out.println("Neurona: "+this.id);
+        System.out.println("Bias: "+this.getBias());
+        for (int i = 0; i < pesos.size(); i++) {
+            if(pesos.get(i)!=0)System.out.println("W"+i+": "+pesos.get(i));
+        }
+    }
+    public void imprimirEntradas(){
+        System.out.println("Neurona: "+this.id);
+        for (int i = 0; i < pesos.size(); i++) {
+            System.out.println(entradas.get(i));
+        }
+    }
+     
     ///////Sets y Gets
     public String getId() {
         return id;
@@ -131,5 +138,21 @@ public class neurona {
     }
     public void setY(float y) {
         this.y = y;
+    }
+
+    public float getTarget() {
+        return target;
+    }
+
+    public void setTarget(float target) {
+        this.target = target;
+    }
+
+    public ePerceptron getEntrenador() {
+        return entrenador;
+    }
+
+    public void setEntrenador(ePerceptron entrenador) {
+        this.entrenador = entrenador;
     }
 }

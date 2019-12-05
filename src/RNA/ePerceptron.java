@@ -11,7 +11,7 @@ import java.util.ArrayList;
  */
 public class ePerceptron{
     private float alfa;
-    private boolean cambio;
+    private boolean parar;
     
     public ePerceptron(float alfa) {
      this.alfa = alfa;   
@@ -21,9 +21,9 @@ public class ePerceptron{
     public void actualizarBias(neurona neuro,float target){
         neuro.setBias(neuro.getBias() + target);
     } 
-    public void actualizarPesos(neurona neuro, float target){
+    public boolean actualizarPesos(neurona neuro, float target){
         
-        if (neuro.getY()!=target) {
+        if (neuro.getY()!=neuro.getTarget()) {
             
             actualizarBias(neuro,target);
             
@@ -33,44 +33,15 @@ public class ePerceptron{
             for (int i = 0; i < nPesos.size(); i++) {
                 nPesos.set(i, ((float)nPesos.get(i)+(target*(float)entradas.get(i)*alfa)));
             }
-            cambio=true;
-        }else{
-            cambio=false;
+            return false;
         }
+        
+        return true;
     } 
-    public void entrenar(neurona n,boolean target,boolean typeData){
-        float t;
-        if (target) {
-            t=1;
-        }else{
-            t=-1;
-        }
-        
+     public boolean entrenar(neurona n,float target){    
         n.calcularYin();
         n.evaluarYin();
-
-        this.actualizarPesos(n, t);
-        
-        while (this.isCambio()) {
-            n.calcularYin();
-            n.evaluarYin();      
-            this.actualizarPesos(n, t);
-        }
-        
-    }
-     public void entrenar(neurona n,float target,boolean typeData){
-        
-        n.calcularYin();
-        n.evaluarYin();
-
-        this.actualizarPesos(n, target);
-        
-        while (this.isCambio()) {
-            n.calcularYin();
-            n.evaluarYin();      
-            this.actualizarPesos(n, target);
-        }
-        
+        return actualizarPesos(n, target);
     }
 
     
@@ -78,13 +49,13 @@ public class ePerceptron{
     public float getAlfa() {
         return alfa;
     }
-    public boolean isCambio() {
-        return cambio;
+    public boolean isParar() {
+        return parar;
     }
     public void setAlfa(float alfa) {
         this.alfa = alfa;
     }
-    public void setCambio(boolean cambio) {
-        this.cambio = cambio;
+    public void setParar(boolean parar) {
+        this.parar = parar;
     }
 }

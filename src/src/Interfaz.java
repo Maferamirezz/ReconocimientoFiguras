@@ -1,6 +1,7 @@
 
 package src;
 
+import RNA.RNAPerceptron;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -10,6 +11,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -24,14 +26,21 @@ public class Interfaz extends javax.swing.JFrame {
     Graphics2D paint2d;
     Graphics2D paint2dt;
     BufferedImage buffer;
+    RNAPerceptron rna;
+    ArrayList<figuraAgregada> registro;
+    ArrayList<BufferedImage> arrayFiguras;
+    
    
     
     //Constructor
     public Interfaz(ListModel jList) {
         initComponents();
-        ReiniciarBuffer();
-        ListaFormas.setModel(jList);
-       
+        
+        ReiniciarBuffer();  //Reinicia el buffer para guardar lo que se dibuja en el paneldibujo para luego binarizar
+        ListaFormas.setModel(jList);    //Nos lista las formas que recibimos de la pantalla anterior
+        CrearRNA();
+        EntrenamientoInicial();
+               
         setLocationRelativeTo(null);
         this.setVisible(true);
     }
@@ -40,6 +49,7 @@ public class Interfaz extends javax.swing.JFrame {
     private void ReiniciarBuffer(){
         buffer = new BufferedImage(800, 500, BufferedImage.TYPE_INT_RGB);
         paint2dt = (Graphics2D) buffer.getGraphics();
+        registro = new ArrayList<>();
     }
     
     private void MostrarPreview() {
@@ -95,97 +105,37 @@ public class Interfaz extends javax.swing.JFrame {
     }
     
     private void GenerarFormas(){
-        paint = this.PanelDibujo.getGraphics();
-        paint2d = (Graphics2D) paint;
-        int random,x,y;
+        int x,y;
         
-        FigurasGeometricas figura = new FigurasGeometricas();
-        Rectangle2D rectangulo;
-        Ellipse2D elipse;
-        Polygon poligono;
-        
-        for (int i = 0; i < 10; i++) {
-            random = (int) (Math.random() * ListaFormas.getModel().getSize());
-            x= ((int)(Math.random()*PanelDibujo.getWidth()));
-            y= ((int)(Math.random()*PanelDibujo.getHeight()));
+        for (int i = 0; i < ListaFormas.getModel().getSize(); i++) {
+            x= ((int)(Math.random()*PanelDibujo.getWidth())); 
+            y= ((int)(Math.random()*PanelDibujo.getHeight())); 
             if(x>600)x=599;
-            if(y>300)y=299;
-            switch (ListaFormas.getModel().getElementAt(random)) {
-                case "Cuadradro":
-                paint2d.draw(new Rectangle2D.Double(x,y,200,200));                
-                paint2dt.draw(new Rectangle2D.Double(x,y,200,200));                
-                PanelDibujo.paintComponents(paint2d);
-            break;
-            case "Rectangulo":
-                paint2d.draw(new Rectangle2D.Double(x,y,200,150));
-                paint2dt.draw(new Rectangle2D.Double(x,y,200,150));
-                PanelDibujo.paintComponents(paint2d);
-            break;
-            case "Elipse":
-                paint2d.draw(new Ellipse2D.Double(x,y,200,150));
-                paint2dt.draw(new Ellipse2D.Double(x,y,200,150));
-                PanelDibujo.paintComponents(paint2d);
-            break;
-            case "Circulo":
-                paint2d.draw(new Ellipse2D.Double(x,y,200,200));
-                paint2dt.draw(new Ellipse2D.Double(x,y,200,200));
-                PanelDibujo.paintComponents(paint2d);
-            break;
-            case "Triangulo":
-                int xp[] = {x, x + 100, x + 200};
-                int yp[] = {y + 200, y, y + 200};
-                paint2d.draw(new Polygon(xp, yp, 3));
-                paint2dt.draw(new Polygon(xp, yp, 3));
-                PanelDibujo.paintComponents(paint2d);
-                break;
-            case "Trapecio":
-                int xa[] = {x, x + 50, x + 150, x + 190};
-                int yb[] = {y + 190, y + 10, y + 10, y + 190};
-                paint2d.draw(new Polygon(xa, yb, 4));
-                paint2dt.draw(new Polygon(xa, yb, 4));
-                PanelDibujo.paintComponents(paint2d);
-                break;
-            case "Hexagono":
-                int xc[] = {x, x + 50, x + 150, x + 190, x + 150, x + 50};
-                int yd[] = {y + 100, y + 10, y + 10, y + 100, y + 190, y + 190};
-                paint2d.draw(new Polygon(xc, yd, 6));
-                paint2dt.draw(new Polygon(xc, yd, 6));
-                PanelDibujo.paintComponents(paint2d);
-                break;
-            default:
-                
-            }
-            
-        }
-       
-        
+            if(y>300)y=299;   
+            InsertarForma(ListaFormas.getModel().getElementAt(i),x,y);
+        }               
     }
     
-    private void InsertarForma(int x, int y){
+    private void InsertarForma(String forma,int x, int y){
         paint = this.PanelDibujo.getGraphics();
         paint2d = (Graphics2D) paint;
-        paint2dt = (Graphics2D) buffer.getGraphics();
-        FigurasGeometricas figura = new FigurasGeometricas();
-        Rectangle2D rectangulo;
-        Ellipse2D elipse;
-        Polygon poligono;
-        x-=100;
-        y-=100;
- 
-        switch (ListaFormas.getSelectedValue()) {
+        paint2dt = (Graphics2D) buffer.getGraphics();        
+
+        registro.add(new figuraAgregada(forma,x,y));
+        switch (forma) {
             case "Cuadradro":
                 paint2d.draw(new Rectangle2D.Double(x,y,200,200));
                 paint2dt.draw(new Rectangle2D.Double(x,y,200,200));
                 PanelDibujo.paintComponents(paint2d);
             break;
             case "Rectangulo":
-                paint2d.draw(new Rectangle2D.Double(x,y,200,150));
-                paint2dt.draw(new Rectangle2D.Double(x,y,200,150));
+                paint2d.draw(new Rectangle2D.Double(x,y+25,200,150));
+                paint2dt.draw(new Rectangle2D.Double(x,y+25,200,150));
                 PanelDibujo.paintComponents(paint2d);
             break;
             case "Elipse":
-                paint2d.draw(new Ellipse2D.Double(x,y,200,150));
-                paint2dt.draw(new Ellipse2D.Double(x,y,200,150));
+                paint2d.draw(new Ellipse2D.Double(x,y+25,200,150));
+                paint2dt.draw(new Ellipse2D.Double(x,y+25,200,150));
                 PanelDibujo.paintComponents(paint2d);
             break;
             case "Circulo":
@@ -201,15 +151,15 @@ public class Interfaz extends javax.swing.JFrame {
                 PanelDibujo.paintComponents(paint2d);
                 break;
             case "Trapecio":
-                int xa[] = {x, x + 50, x + 150, x + 190};
-                int yb[] = {y + 190, y + 10, y + 10, y + 190};
+                int xa[] = {x, x + 50, x + 150, x + 200};
+                int yb[] = {y + 200, y, y, y + 200};
                 paint2d.draw(new Polygon(xa, yb, 4));
                 paint2dt.draw(new Polygon(xa, yb, 4));
                 PanelDibujo.paintComponents(paint2d);
                 break;
             case "Hexagono":
-                int xc[] = {x, x + 50, x + 150, x + 190, x + 150, x + 50};
-                int yd[] = {y + 100, y + 10, y + 10, y + 100, y + 190, y + 190};
+                int xc[] = {x, x + 50, x + 150, x + 200, x + 150, x + 50};
+                int yd[] = {y + 100, y, y, y + 100, y + 200, y + 200};
                 paint2d.draw(new Polygon(xc, yd, 6));
                 paint2dt.draw(new Polygon(xc, yd, 6));
                 PanelDibujo.paintComponents(paint2d);
@@ -226,7 +176,7 @@ public class Interfaz extends javax.swing.JFrame {
         for (int i = 0; i < 200 ; i++) {
             for (int j = 0; j < 200; j++) {                                
                 //arreglo[i][j]= new Color(buffer.getRGB(j, i));
-                if(buffer.getRGB(j, i)==-1)System.out.println("RedGreenBlue:"+ buffer.getRGB(j, i));
+                
             }
         }
      
@@ -253,14 +203,76 @@ public class Interfaz extends javax.swing.JFrame {
         }
     }
     
-    private void GuardarImagen(){
+    private void GuardarImagenPNG(BufferedImage buffer,String nombre){
         try {
-            ImageIO.write(buffer, "png", new File("salida.png"));
+            ImageIO.write(buffer, "png", new File(nombre+".png"));
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, ex);
         }
     }
     
+    private void CrearRNA(){
+        rna = new RNAPerceptron(0,1);   //Instanciamos la clase de la RNA con umbral 0 y alfa 1
+        rna.CrearCapa(ListaFormas.getModel().getSize());    //Ocupamos una capa por lo que un llamado a la funcion con el tamaño de la lista
+                                                            //como parametro para crear las neuronas necesarias 
+    }
+            
+    private void EntrenarRNA(){
+        //sacar los segmentos de 200x200, reunirlos todos en un almacen, enviarlos a entrenar con los registros que actuan como target
+    }
+    
+    private void EntrenamientoInicial(){
+        arrayFiguras = new ArrayList<>();
+        BufferedImage bf;
+        for (int i = 0; i < ListaFormas.getModel().getSize(); i++) {
+            bf = new BufferedImage(200,200,BufferedImage.TYPE_INT_RGB);
+            guardarEnBuffer(ListaFormas.getModel().getElementAt(i),bf.getGraphics());
+            arrayFiguras.add(bf);
+        }                
+        rna.IniciarEntrenamiento(arrayFiguras);
+        rna.IniciarEntrenamiento(arrayFiguras);
+        //rna.VerSalida();
+       // rna.ImprimirPesosCapaX(0);
+    }
+    
+    private void guardarEnBuffer(String forma, Graphics graphicsbuffer){
+        Graphics g = graphicsbuffer;
+        Graphics2D g2d = (Graphics2D) g;      
+        int x=0;int y=0;
+        
+        switch (forma) {
+            case "Cuadradro":
+                g2d.draw(new Rectangle2D.Double(x,y,200,200));                
+            break;
+            case "Rectangulo":
+                g2d.draw(new Rectangle2D.Double(x,y+25,200,150));
+            break;
+            case "Elipse":
+                g2d.draw(new Ellipse2D.Double(x,y+25,200,150));
+            break;
+            case "Circulo":
+                g2d.draw(new Ellipse2D.Double(x,y,200,200));
+            break;
+            case "Triangulo":
+                int xp[] = {x, x + 100, x + 200};
+                int yp[] = {y + 200, y, y + 200};
+                g2d.draw(new Polygon(xp, yp, 3));
+                break;
+            case "Trapecio":
+                int xa[] = {x, x + 50, x + 150, x + 200};
+                int yb[] = {y + 200, y, y, y + 200};
+                g2d.draw(new Polygon(xa, yb, 4));
+                break;
+            case "Hexagono":
+                int xc[] = {x, x + 50, x + 150, x + 200, x + 150, x + 50};
+                int yd[] = {y + 100, y, y, y + 100, y + 200, y + 200};
+                g2d.draw(new Polygon(xc, yd, 6));
+                break;
+            default:
+                
+        }
+        
+    }
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -305,11 +317,6 @@ public class Interfaz extends javax.swing.JFrame {
             .addGap(0, 500, Short.MAX_VALUE)
         );
 
-        ListaFormas.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Circulo", "Elipse", "Cuadradro", "Rectangulo", "Triangulo" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
         ListaFormas.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
                 ListaFormasValueChanged(evt);
@@ -472,7 +479,9 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton4MousePressed
 
     private void PanelDibujoMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_PanelDibujoMousePressed
-        if(!ListaFormas.isSelectionEmpty() && evt.getButton()==1)InsertarForma(evt.getX(),evt.getY());
+        if(!ListaFormas.isSelectionEmpty() && evt.getButton()==1){
+            InsertarForma(ListaFormas.getSelectedValue(),evt.getX()-100,evt.getY()-100);
+        }
         if(evt.getButton()==3 && evt.getClickCount()>1){
             PanelDibujo.repaint();
             ReiniciarBuffer();
@@ -493,7 +502,20 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1MouseReleased
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        this.GuardarImagen();
+        System.out.println("Prueba Figura 1");
+        rna.CalcularSalida(arrayFiguras.get(0));
+        System.out.println("Prueba Figura 2");
+        rna.CalcularSalida(arrayFiguras.get(1));
+        System.out.println("Prueba Figura 3");
+        rna.CalcularSalida(arrayFiguras.get(2));
+        System.out.println("Prueba Figura 4");
+        rna.CalcularSalida(arrayFiguras.get(3));
+        System.out.println("Prueba Figura 5");
+        rna.CalcularSalida(arrayFiguras.get(4));
+        System.out.println("Prueba Figura 6");
+        rna.CalcularSalida(arrayFiguras.get(5));
+        System.out.println("Prueba Figura 7");
+        rna.CalcularSalida(arrayFiguras.get(6));
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
