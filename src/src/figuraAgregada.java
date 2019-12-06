@@ -6,6 +6,8 @@
 
 package src;
 
+import java.awt.image.BufferedImage;
+
 /**
  * 
  * @author Luis Benitez
@@ -15,12 +17,14 @@ public class figuraAgregada {
     private int x;
     private int y;
     private String nombre;
+    private BufferedImage buffer; //buffer de una subimagen de toda la imagen principal
     
     
-    public  figuraAgregada(String n,int cx,int cy){
+    public  figuraAgregada(String n,int cx,int cy /* BufferedImage b*/){
         nombre=n;
         x=cx;
         y=cy;
+//        buffer=b;
     }
 
    
@@ -50,6 +54,14 @@ public class figuraAgregada {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public BufferedImage getBuffer() {
+        return buffer;
+    }
+
+    public void setBuffer(BufferedImage buffer) {
+        this.buffer = buffer;
     }
     
 }

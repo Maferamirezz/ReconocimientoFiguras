@@ -89,7 +89,7 @@ public class RNAPerceptron {
                 }                                
                         
                   capas.get(0).CalcularSalida();
-               capas.get(0).VerSalida();
+               
     }
     
 

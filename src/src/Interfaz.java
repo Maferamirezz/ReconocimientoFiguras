@@ -2,7 +2,6 @@
 package src;
 
 import RNA.RNAPerceptron;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
@@ -25,10 +24,12 @@ public class Interfaz extends javax.swing.JFrame {
     Graphics paint;
     Graphics2D paint2d;
     Graphics2D paint2dt;
-    BufferedImage buffer;
     RNAPerceptron rna;
+    BufferedImage bufferPanelDibujo;
     ArrayList<figuraAgregada> registro;
-    ArrayList<BufferedImage> arrayFiguras;
+    ArrayList<BufferedImage> arrayFigurasTotales;
+    int AnchoFigura = 200;int AltoFigura = 200;
+    int[] contador;
     
    
     
@@ -36,7 +37,7 @@ public class Interfaz extends javax.swing.JFrame {
     public Interfaz(ListModel jList) {
         initComponents();
         
-        ReiniciarBuffer();  //Reinicia el buffer para guardar lo que se dibuja en el paneldibujo para luego binarizar
+        ReiniciarBuffer();  //Reinicia el bufferPanelDibujo para guardar lo que se dibuja en el paneldibujo para luego binarizar
         ListaFormas.setModel(jList);    //Nos lista las formas que recibimos de la pantalla anterior
         CrearRNA();
         EntrenamientoInicial();
@@ -47,8 +48,8 @@ public class Interfaz extends javax.swing.JFrame {
 
     //Metodos
     private void ReiniciarBuffer(){
-        buffer = new BufferedImage(800, 500, BufferedImage.TYPE_INT_RGB);
-        paint2dt = (Graphics2D) buffer.getGraphics();
+        bufferPanelDibujo = new BufferedImage(800, 500, BufferedImage.TYPE_INT_RGB);
+        paint2dt = (Graphics2D) bufferPanelDibujo.getGraphics();
         registro = new ArrayList<>();
     }
     
@@ -110,8 +111,8 @@ public class Interfaz extends javax.swing.JFrame {
         for (int i = 0; i < ListaFormas.getModel().getSize(); i++) {
             x= ((int)(Math.random()*PanelDibujo.getWidth())); 
             y= ((int)(Math.random()*PanelDibujo.getHeight())); 
-            if(x>600)x=599;
-            if(y>300)y=299;   
+            if(x>600)x=600;
+            if(y>300)y=300;   
             InsertarForma(ListaFormas.getModel().getElementAt(i),x,y);
         }               
     }
@@ -119,9 +120,11 @@ public class Interfaz extends javax.swing.JFrame {
     private void InsertarForma(String forma,int x, int y){
         paint = this.PanelDibujo.getGraphics();
         paint2d = (Graphics2D) paint;
-        paint2dt = (Graphics2D) buffer.getGraphics();        
+        paint2dt = (Graphics2D) bufferPanelDibujo.getGraphics();        
 
+        //registramos las figuras agregadas, el nombre, coordenadas 
         registro.add(new figuraAgregada(forma,x,y));
+        
         switch (forma) {
             case "Cuadradro":
                 paint2d.draw(new Rectangle2D.Double(x,y,200,200));
@@ -171,15 +174,29 @@ public class Interfaz extends javax.swing.JFrame {
     }
     
     private void RecolectarEntradas(){
-        Color[][] arreglo = new Color[200][200];
         
-        for (int i = 0; i < 200 ; i++) {
-            for (int j = 0; j < 200; j++) {                                
-                //arreglo[i][j]= new Color(buffer.getRGB(j, i));
-                
+        for (int i = 0; i < PanelDibujo.getHeight()-200 ; i+=10) {
+            for (int j = 0; j < PanelDibujo.getWidth()-200; j+=10) {                                
+                rna.CalcularSalida(bufferPanelDibujo.getSubimage(j, i, AnchoFigura, AltoFigura));
+                contar();
             }
         }
-     
+
+        for (int i = 0; i < contador.length; i++) {
+            System.out.println(contador[i]);
+        }
+    }
+    
+    private void contar(){
+        for (int i = 0; i < rna.getCapas().get(0).getCapa().size(); i++) {
+            if (rna.getCapas().get(0).getCapa().get(i).getY() == 1) {
+                System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+                contador[i]++;
+                System.out.println(contador[i]);
+            }
+            
+        }
+        
     }
     
     private void CargarImagen(){
@@ -192,7 +209,7 @@ public class Interfaz extends javax.swing.JFrame {
             paint2d = (Graphics2D) paint;
             try {
                 BufferedImage imagen = ImageIO.read(file.getSelectedFile());
-                buffer= imagen;
+                bufferPanelDibujo= imagen;
                 paint2d.drawImage(imagen, 0, 0, PanelDibujo.getWidth(), PanelDibujo.getHeight(), null);
                 PanelDibujo.paintComponents(paint2d);
             } catch (IOException ex) {
@@ -222,15 +239,15 @@ public class Interfaz extends javax.swing.JFrame {
     }
     
     private void EntrenamientoInicial(){
-        arrayFiguras = new ArrayList<>();
+        arrayFigurasTotales = new ArrayList<>();
         BufferedImage bf;
         for (int i = 0; i < ListaFormas.getModel().getSize(); i++) {
             bf = new BufferedImage(200,200,BufferedImage.TYPE_INT_RGB);
             guardarEnBuffer(ListaFormas.getModel().getElementAt(i),bf.getGraphics());
-            arrayFiguras.add(bf);
+            arrayFigurasTotales.add(bf);
         }                
-        rna.IniciarEntrenamiento(arrayFiguras);
-        rna.IniciarEntrenamiento(arrayFiguras);
+        rna.IniciarEntrenamiento(arrayFigurasTotales);
+        rna.IniciarEntrenamiento(arrayFigurasTotales);
         //rna.VerSalida();
        // rna.ImprimirPesosCapaX(0);
     }
@@ -289,6 +306,9 @@ public class Interfaz extends javax.swing.JFrame {
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenu2 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("RNA");
@@ -447,6 +467,14 @@ public class Interfaz extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jMenu1.setText("File");
+        jMenuBar1.add(jMenu1);
+
+        jMenu2.setText("Edit");
+        jMenuBar1.add(jMenu2);
+
+        setJMenuBar(jMenuBar1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -489,6 +517,7 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_PanelDibujoMousePressed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        contador=new int[ListaFormas.getModel().getSize()];
         RecolectarEntradas();
     }//GEN-LAST:event_jButton3ActionPerformed
 
@@ -502,20 +531,41 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1MouseReleased
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+//        this.RecolectarEntradas();
+    this.InsertarForma("Circulo", 0, 0);
         System.out.println("Prueba Figura 1");
-        rna.CalcularSalida(arrayFiguras.get(0));
+        rna.CalcularSalida(bufferPanelDibujo.getSubimage(0, 0, 200, 200));
+        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
         System.out.println("Prueba Figura 2");
-        rna.CalcularSalida(arrayFiguras.get(1));
+        rna.CalcularSalida(bufferPanelDibujo.getSubimage(1, 0, 200, 200));
+        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
         System.out.println("Prueba Figura 3");
-        rna.CalcularSalida(arrayFiguras.get(2));
+        rna.CalcularSalida(bufferPanelDibujo.getSubimage(2, 0, 200, 200));
+        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
         System.out.println("Prueba Figura 4");
-        rna.CalcularSalida(arrayFiguras.get(3));
+        rna.CalcularSalida(bufferPanelDibujo.getSubimage(3, 0, 200, 200));
+        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
         System.out.println("Prueba Figura 5");
-        rna.CalcularSalida(arrayFiguras.get(4));
+        rna.CalcularSalida(bufferPanelDibujo.getSubimage(4, 0, 200, 200));
+        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
         System.out.println("Prueba Figura 6");
-        rna.CalcularSalida(arrayFiguras.get(5));
+        rna.CalcularSalida(bufferPanelDibujo.getSubimage(5, 0, 200, 200));
+        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
         System.out.println("Prueba Figura 7");
-        rna.CalcularSalida(arrayFiguras.get(6));
+        rna.CalcularSalida(bufferPanelDibujo.getSubimage(6, 0, 200, 200));
+        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println("Prueba Figura 7");
+        rna.CalcularSalida(bufferPanelDibujo.getSubimage(1, 2, 200, 200));
+        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println("Prueba Figura 7");
+        rna.CalcularSalida(bufferPanelDibujo.getSubimage(2, 1, 200, 200));
+        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println("Prueba Figura 7");
+        rna.CalcularSalida(bufferPanelDibujo.getSubimage(3, 1, 200, 200));
+        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println("Prueba Figura 7");
+        rna.CalcularSalida(bufferPanelDibujo.getSubimage(4, 1, 200, 200));
+        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
     }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
@@ -564,6 +614,9 @@ public class Interfaz extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
