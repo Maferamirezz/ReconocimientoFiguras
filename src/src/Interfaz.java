@@ -308,7 +308,19 @@ public class Interfaz extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
+        jmGuardar = new javax.swing.JMenuItem();
+        jmCargar = new javax.swing.JMenuItem();
+        jmSalir = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jMenu3 = new javax.swing.JMenu();
+        jMenuItem4 = new javax.swing.JMenuItem();
+        jMenuItem5 = new javax.swing.JMenuItem();
+        jMenu4 = new javax.swing.JMenu();
+        jMenuItem6 = new javax.swing.JMenuItem();
+        jMenuItem7 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("RNA");
@@ -467,11 +479,51 @@ public class Interfaz extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jMenu1.setText("File");
+        jMenu1.setText("Archivo");
+
+        jmGuardar.setText("Guardar Pesos w");
+        jMenu1.add(jmGuardar);
+
+        jmCargar.setText("Cargar Pesos w");
+        jMenu1.add(jmCargar);
+
+        jmSalir.setText("Salir");
+        jMenu1.add(jmSalir);
+
         jMenuBar1.add(jMenu1);
 
-        jMenu2.setText("Edit");
+        jMenu2.setText("Entrenamiento");
+
+        jMenuItem1.setText("Entrenar Ultima Agregada");
+        jMenu2.add(jMenuItem1);
+
+        jMenuItem2.setText("Entrenar Imagen Completa");
+        jMenu2.add(jMenuItem2);
+
+        jMenuItem3.setText("jMenuItem3");
+        jMenu2.add(jMenuItem3);
+
         jMenuBar1.add(jMenu2);
+
+        jMenu3.setText("Calculo de Salidas");
+
+        jMenuItem4.setText("Verificar Ultima Agregada");
+        jMenu3.add(jMenuItem4);
+
+        jMenuItem5.setText("Verificar Figuras");
+        jMenu3.add(jMenuItem5);
+
+        jMenuBar1.add(jMenu3);
+
+        jMenu4.setText("Impresion de Valores");
+
+        jMenuItem6.setText("Ver Pesos");
+        jMenu4.add(jMenuItem6);
+
+        jMenuItem7.setText("Ver Salidas Yn");
+        jMenu4.add(jMenuItem7);
+
+        jMenuBar1.add(jMenu4);
 
         setJMenuBar(jMenuBar1);
 
@@ -616,9 +668,21 @@ public class Interfaz extends javax.swing.JFrame {
     private javax.swing.JButton jButton4;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
+    private javax.swing.JMenu jMenu4;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenuItem jMenuItem5;
+    private javax.swing.JMenuItem jMenuItem6;
+    private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JMenuItem jmCargar;
+    private javax.swing.JMenuItem jmGuardar;
+    private javax.swing.JMenuItem jmSalir;
     // End of variables declaration//GEN-END:variables
 }
 

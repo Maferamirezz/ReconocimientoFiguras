@@ -13,57 +13,57 @@ import java.util.ArrayList;
  * @author Luis Benitez
  */
 public class capa {
-    private ArrayList<neurona> capa;    //arraylist de neuronas de la capa
+    private ArrayList<neurona> arrayNeuronas;    //arraylist de neuronas de la arrayNeuronas
      
     //Constructor
     public capa(int neuronas, fActivacion funcion,ePerceptron entrenador,capa sigcapa){
-        capa = new ArrayList<>();
+        arrayNeuronas = new ArrayList<>();
     
         for (int i = 0; i < neuronas; i++) {
-            capa.add(new neurona("Y"+i,funcion,entrenador,sigcapa));
+            arrayNeuronas.add(new neurona("Y"+i,funcion,entrenador,sigcapa));
         }
     }
     
-    //Metodos aplicados a todas las neuronas de la capa
+    //Metodos aplicados a todas las neuronas de la arrayNeuronas
     public void VerSalida(){
-        capa.forEach(next->{System.out.println(next.getId()+" Y: "+next.getY());});
+        arrayNeuronas.forEach(next->{System.out.println(next.getId()+" Y: "+next.getY());});
     }
     public void CalcularSalida(){
-        capa.forEach(next->{next.CalcularSalida();});
+        arrayNeuronas.forEach(next->{next.CalcularSalida();});
     }
     public void initPesos(boolean typeData){
-        capa.forEach(next->{next.inicializarPesos(typeData);});
+        arrayNeuronas.forEach(next->{next.inicializarPesos(typeData);});
     } 
     public void distribuirEntrada(float entrada){
-        capa.forEach((next) -> {
+        arrayNeuronas.forEach((next) -> {
             next.agregarEntrada(entrada);
         });
     }
     public void entrenarCapa(){
-        capa.forEach((next) -> {
+        arrayNeuronas.forEach((next) -> {
             next.entrenar();
         });
     }
     public void resetTargets(){
-        capa.forEach((next) -> {
+        arrayNeuronas.forEach((next) -> {
             next.setTarget(-1);
         });
     }
     public void setTargetX(int i){
-        capa.get(i).setTarget(1);
+        arrayNeuronas.get(i).setTarget(1);
     }
     public void resetEntradas(){
-        capa.forEach((next) -> {
+        arrayNeuronas.forEach((next) -> {
             next.resetEntradas();
         });
     }
     public void imprimirPesos(){
-        capa.forEach((next) -> {
+        arrayNeuronas.forEach((next) -> {
             next.imprimirPesos();
         });
     }
     public void imprimirEntradas(){
-        capa.forEach((next) -> {
+        arrayNeuronas.forEach((next) -> {
             next.imprimirEntradas();
         });
     }
@@ -73,9 +73,9 @@ public class capa {
     
     //Sets y Gets
     public ArrayList<neurona> getCapa() {
-        return capa;
+        return arrayNeuronas;
     }
     public void setCapa(ArrayList<neurona> capa) {
-        this.capa = capa;
+        this.arrayNeuronas = capa;
     }
 }
