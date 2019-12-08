@@ -4,6 +4,7 @@ package RNA;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 import src.capa;
 
 /**
@@ -31,8 +32,11 @@ public class RNAPerceptron {
     }
     
    
-    public void IniciarEntrenamiento(ArrayList<BufferedImage> registro){       
+    public void EntrenamientoInicial(ArrayList<BufferedImage> registro,int TargetFigura){       
+        boolean[] parar = new boolean[registro.size()];
+        boolean alto;
         do{
+            System.out.println("++++++++++++++++++++++++++++++++++epoca+++++++++++++++++++++++++++++++++++");
             for (int i = 0; i < registro.size(); i++) { //Por cada figura a entrenar
                 capas.get(0).resetEntradas();
                 
@@ -45,14 +49,21 @@ public class RNAPerceptron {
                             capas.get(0).distribuirEntrada(0);
                         }
                     }   
-                }                                
+                }            System.out.println(i);   
                         this.InicializarPesos();//esta instruccion va aqui porque los pesos se inicializan segun el numero de entradas
                         capas.get(0).resetTargets();
-                        capas.get(0).setTargetX(i);
-                        capas.get(0).entrenarCapa();
+                        capas.get(0).setTargetX(i*TargetFigura);
+                        parar[i]=capas.get(0).entrenarCapa();
             }
             
-        }while(algoritmo.isParar());//Mientras no halla cambios al final de la epoca
+            //todos deben ser verdaderos para que pare el entrenamiento
+            for (int i = 0; i < parar.length; i++) {
+                if (!parar[i]) {
+                    alto=false;
+                }
+            }
+            alto=true;
+        }while(!alto);//Mientras no halla cambios al final de la epoca
     }
     
     //vista por consola
@@ -60,7 +71,7 @@ public class RNAPerceptron {
         capas.get(c).imprimirPesos();
     }
     public void ImprimirPesosCapaXNeuronaY(int x, int y){
-        capas.get(x).getCapa().get(y).imprimirPesos();
+        capas.get(x).getNeuronas().get(y).imprimirPesos();
     }
     public void ImprimirEntradasCapaX(int c){
         capas.get(c).imprimirEntradas();
@@ -72,8 +83,7 @@ public class RNAPerceptron {
             capas.forEach(next->{next.initPesos(typeData);});
             initPesos=true;
         }
-    }
-    
+    }    
     public void CalcularSalida(BufferedImage buffer){
         capas.get(0).resetEntradas();
                 
@@ -91,11 +101,16 @@ public class RNAPerceptron {
                   capas.get(0).CalcularSalida();
                
     }
-    
+   
 
     
-    public void VerSalida(){
-        capas.get(capas.size()-1).VerSalida();
+    public String ObtenerSalida(){
+        String salida="";
+        for (int i = 0; i < capas.get(0).getNeuronas().size(); i++) {
+            salida+=capas.get(0).getNeuronas().get(i).getId()+": "+capas.get(0).getNeuronas().get(i).getY()+"\n";
+        }
+        return salida;
+        
     }
           
     

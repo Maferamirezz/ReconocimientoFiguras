@@ -3,8 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Luis/Documents/NetBeansProjects/ReconocimientoFiguras/src/RNA/RNAPerceptron.java</file>
+            <file>file:/C:/Users/Luis/Documents/NetBeansProjects/ReconocimientoFiguras/src/RNA/ePerceptron.java</file>
             <file>file:/C:/Users/Luis/Documents/NetBeansProjects/ReconocimientoFiguras/src/src/Interfaz.java</file>
+            <file>file:/C:/Users/Luis/Documents/NetBeansProjects/ReconocimientoFiguras/src/src/capa.java</file>
+            <file>file:/C:/Users/Luis/Documents/NetBeansProjects/ReconocimientoFiguras/src/RNA/neurona.java</file>
+            <file>file:/C:/Users/Luis/Documents/NetBeansProjects/ReconocimientoFiguras/src/RNA/RNAPerceptron.java</file>
         </group>
     </open-files>
 </project-private>

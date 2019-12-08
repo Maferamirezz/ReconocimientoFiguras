@@ -39,10 +39,17 @@ public class capa {
             next.agregarEntrada(entrada);
         });
     }
-    public void entrenarCapa(){
-        arrayNeuronas.forEach((next) -> {
-            next.entrenar();
-        });
+    public boolean entrenarCapa(){
+        boolean [] cambios = new boolean[arrayNeuronas.size()];
+        for (int i = 0; i < arrayNeuronas.size(); i++) {
+            cambios[i]= arrayNeuronas.get(i).entrenar();
+        }
+        for (int i = 0; i < cambios.length; i++) {
+            if (cambios[i]) {
+                return false;
+            }
+        }
+        return true;
     }
     public void resetTargets(){
         arrayNeuronas.forEach((next) -> {
@@ -72,7 +79,7 @@ public class capa {
     
     
     //Sets y Gets
-    public ArrayList<neurona> getCapa() {
+    public ArrayList<neurona> getNeuronas() {
         return arrayNeuronas;
     }
     public void setCapa(ArrayList<neurona> capa) {

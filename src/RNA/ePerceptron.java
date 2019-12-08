@@ -33,12 +33,12 @@ public class ePerceptron{
             for (int i = 0; i < nPesos.size(); i++) {
                 nPesos.set(i, ((float)nPesos.get(i)+(target*(float)entradas.get(i)*alfa)));
             }
-            return false;
+            return true;
         }
         
-        return true;
+        return false;
     } 
-     public boolean entrenar(neurona n,float target){    
+    public boolean entrenar(neurona n,float target){    
         n.calcularYin();
         n.evaluarYin();
         return actualizarPesos(n, target);

@@ -71,8 +71,8 @@ public class neurona {
         this.evaluarYin();
         this.enviarY();
     }
-    public void entrenar(){
-        entrenador.entrenar(this, target);
+    public boolean entrenar(){
+        return entrenador.entrenar(this, target);
     }
     
     public void imprimirPesos(){

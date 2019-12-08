@@ -27,7 +27,6 @@ public class Interfaz extends javax.swing.JFrame {
     RNAPerceptron rna;
     BufferedImage bufferPanelDibujo;
     ArrayList<figuraAgregada> registro;
-    ArrayList<BufferedImage> arrayFigurasTotales;
     int AnchoFigura = 200;int AltoFigura = 200;
     int[] contador;
     
@@ -111,8 +110,8 @@ public class Interfaz extends javax.swing.JFrame {
         for (int i = 0; i < ListaFormas.getModel().getSize(); i++) {
             x= ((int)(Math.random()*PanelDibujo.getWidth())); 
             y= ((int)(Math.random()*PanelDibujo.getHeight())); 
-            if(x>600)x=600;
-            if(y>300)y=300;   
+            if(x>600)x=590;
+            if(y>300)y=290;   
             InsertarForma(ListaFormas.getModel().getElementAt(i),x,y);
         }               
     }
@@ -122,6 +121,16 @@ public class Interfaz extends javax.swing.JFrame {
         paint2d = (Graphics2D) paint;
         paint2dt = (Graphics2D) bufferPanelDibujo.getGraphics();        
 
+        x-=(x%5);
+        y-=(y%5);
+        if(x<0)x=5;if(x>600)x=595;
+        if(y<0)y=5;if(y>300)y=295;
+        if (forma.equals("Elipse") && y==5)y=0;        //Puramente estetico con cordenadas >=0 y <=300 no hay errores
+        if (forma.equals("Rectangulo") && y==5)y=0;    //Puramente estetico    
+        if (forma.equals("Elipse") && y==295)y=300;     //Puramente estetico
+        if (forma.equals("Rectangulo") && y==295)y=300; //Puramente estetico
+        
+        
         //registramos las figuras agregadas, el nombre, coordenadas 
         registro.add(new figuraAgregada(forma,x,y));
         
@@ -175,8 +184,8 @@ public class Interfaz extends javax.swing.JFrame {
     
     private void RecolectarEntradas(){
         
-        for (int i = 0; i < PanelDibujo.getHeight()-200 ; i+=10) {
-            for (int j = 0; j < PanelDibujo.getWidth()-200; j+=10) {                                
+        for (int i = 0; i < PanelDibujo.getHeight()-200 ; i+=5) {
+            for (int j = 0; j < PanelDibujo.getWidth()-200; j+=5) {                                
                 rna.CalcularSalida(bufferPanelDibujo.getSubimage(j, i, AnchoFigura, AltoFigura));
                 contar();
             }
@@ -188,11 +197,9 @@ public class Interfaz extends javax.swing.JFrame {
     }
     
     private void contar(){
-        for (int i = 0; i < rna.getCapas().get(0).getCapa().size(); i++) {
-            if (rna.getCapas().get(0).getCapa().get(i).getY() == 1) {
-                System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        for (int i = 0; i < rna.getCapas().get(0).getNeuronas().size(); i++) {
+            if (rna.getCapas().get(0).getNeuronas().get(i).getY() == 1) {
                 contador[i]++;
-                System.out.println(contador[i]);
             }
             
         }
@@ -235,27 +242,84 @@ public class Interfaz extends javax.swing.JFrame {
     }
             
     private void EntrenarRNA(){
-        //sacar los segmentos de 200x200, reunirlos todos en un almacen, enviarlos a entrenar con los registros que actuan como target
+        ArrayList<BufferedImage> buffer = new ArrayList<>();
+        for (int i = 0; i < registro.size(); i++) {
+            buffer.add(bufferPanelDibujo.getSubimage(
+                    registro.get(i).getX(),
+                    registro.get(i).getY(),
+                    200,
+                    200));
+        }
+//        rna.IniciarEntrenamiento(buffer);
     }
     
     private void EntrenamientoInicial(){
-        arrayFigurasTotales = new ArrayList<>();
+        //Unicamente para este proyecto, despues de entrenarlo y guardar los pesos puede desaparecer
+        ArrayList<BufferedImage> arrayFigurasTotales = new ArrayList<>();
+        ArrayList<BufferedImage> arrayFigurasNoTotales = new ArrayList<>();
+        BufferedImage bf;
+        for (int m = 0; m < ListaFormas.getModel().getSize(); m++) {
+            bf = new BufferedImage(600,600,BufferedImage.TYPE_INT_RGB);
+            guardarEnBuffer(ListaFormas.getModel().getElementAt(m),bf.getGraphics(),false);
+            arrayFigurasTotales.add(bf.getSubimage(200, 200, 200, 200));
+            
+//            for (int i = 0; i < 200; i++) {
+//                for (int j = 0; j < 400; j++) {
+//                    arrayFigurasNoTotales.add(bf.getSubimage(j, i, 200, 200));
+//                }
+//            }
+//            
+//            for (int i = 201; i < 400; i++) {
+//                for (int j = 0; j < 400; j++) {
+//                    arrayFigurasNoTotales.add(bf.getSubimage(j, i, 200, 200));
+//                }
+//            }
+            
+        }        
+        rna.EntrenamientoInicial(arrayFigurasTotales,1);
+        rna.EntrenamientoInicial(arrayFigurasTotales,1);
+//        rna.EntrenamientoInicial(arrayFigurasNoTotales,0);
+        
+    }
+    
+    private void CheckLastAdded(){
+        if (!registro.isEmpty()) {
+            rna.CalcularSalida(bufferPanelDibujo.getSubimage(
+                registro.get(registro.size()-1).getX(),
+                registro.get(registro.size()-1).getY(),
+                200,
+                200));
+        JOptionPane.showMessageDialog(this, rna.ObtenerSalida());
+        }
+    }
+    
+    private void CheckAllForms(){
+         //Unicamente para este proyecto, despues de entrenarlo y guardar los pesos puede desaparecer
+        ArrayList<BufferedImage> arrayFigurasTotales = new ArrayList<>();
         BufferedImage bf;
         for (int i = 0; i < ListaFormas.getModel().getSize(); i++) {
             bf = new BufferedImage(200,200,BufferedImage.TYPE_INT_RGB);
-            guardarEnBuffer(ListaFormas.getModel().getElementAt(i),bf.getGraphics());
+            guardarEnBuffer(ListaFormas.getModel().getElementAt(i),bf.getGraphics(),true);
             arrayFigurasTotales.add(bf);
-        }                
-        rna.IniciarEntrenamiento(arrayFigurasTotales);
-        rna.IniciarEntrenamiento(arrayFigurasTotales);
-        //rna.VerSalida();
-       // rna.ImprimirPesosCapaX(0);
+        }  
+        for (int i = 0; i < arrayFigurasTotales.size(); i++) {
+             rna.CalcularSalida(arrayFigurasTotales.get(i));
+            JOptionPane.showMessageDialog(this, ListaFormas.getModel().getElementAt(i)+"\n"+rna.ObtenerSalida());
+        }
+        
     }
     
-    private void guardarEnBuffer(String forma, Graphics graphicsbuffer){
+    private void guardarEnBuffer(String forma, Graphics graphicsbuffer,boolean init){
         Graphics g = graphicsbuffer;
-        Graphics2D g2d = (Graphics2D) g;      
-        int x=0;int y=0;
+        Graphics2D g2d = (Graphics2D) g;  
+        int x=200;
+        int y=200;
+        if(init){
+             x=0;
+             y=0;
+        }else{
+            
+        }
         
         switch (forma) {
             case "Cuadradro":
@@ -508,9 +572,19 @@ public class Interfaz extends javax.swing.JFrame {
         jMenu3.setText("Calculo de Salidas");
 
         jMenuItem4.setText("Verificar Ultima Agregada");
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
         jMenu3.add(jMenuItem4);
 
         jMenuItem5.setText("Verificar Figuras");
+        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem5ActionPerformed(evt);
+            }
+        });
         jMenu3.add(jMenuItem5);
 
         jMenuBar1.add(jMenu3);
@@ -565,6 +639,7 @@ public class Interfaz extends javax.swing.JFrame {
         if(evt.getButton()==3 && evt.getClickCount()>1){
             PanelDibujo.repaint();
             ReiniciarBuffer();
+            registro=new ArrayList<>();
         }
     }//GEN-LAST:event_PanelDibujoMousePressed
 
@@ -576,6 +651,7 @@ public class Interfaz extends javax.swing.JFrame {
     private void jButton1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MousePressed
         PanelDibujo.repaint();
         ReiniciarBuffer();
+        registro=new ArrayList<>();
     }//GEN-LAST:event_jButton1MousePressed
 
     private void jButton1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseReleased
@@ -587,38 +663,46 @@ public class Interfaz extends javax.swing.JFrame {
     this.InsertarForma("Circulo", 0, 0);
         System.out.println("Prueba Figura 1");
         rna.CalcularSalida(bufferPanelDibujo.getSubimage(0, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
         System.out.println("Prueba Figura 2");
         rna.CalcularSalida(bufferPanelDibujo.getSubimage(1, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
         System.out.println("Prueba Figura 3");
         rna.CalcularSalida(bufferPanelDibujo.getSubimage(2, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
         System.out.println("Prueba Figura 4");
         rna.CalcularSalida(bufferPanelDibujo.getSubimage(3, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
         System.out.println("Prueba Figura 5");
         rna.CalcularSalida(bufferPanelDibujo.getSubimage(4, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
         System.out.println("Prueba Figura 6");
         rna.CalcularSalida(bufferPanelDibujo.getSubimage(5, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
         System.out.println("Prueba Figura 7");
         rna.CalcularSalida(bufferPanelDibujo.getSubimage(6, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
         System.out.println("Prueba Figura 7");
         rna.CalcularSalida(bufferPanelDibujo.getSubimage(1, 2, 200, 200));
-        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
         System.out.println("Prueba Figura 7");
         rna.CalcularSalida(bufferPanelDibujo.getSubimage(2, 1, 200, 200));
-        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
         System.out.println("Prueba Figura 7");
         rna.CalcularSalida(bufferPanelDibujo.getSubimage(3, 1, 200, 200));
-        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
         System.out.println("Prueba Figura 7");
         rna.CalcularSalida(bufferPanelDibujo.getSubimage(4, 1, 200, 200));
-        System.out.println(rna.getCapas().get(0).getCapa().get(0).getY());
+        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        this.CheckLastAdded();
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
+
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        CheckAllForms();
+    }//GEN-LAST:event_jMenuItem5ActionPerformed
 
     /**
      * @param args the command line arguments
