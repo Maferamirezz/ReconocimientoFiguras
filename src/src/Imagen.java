@@ -76,6 +76,7 @@ public class Imagen {
         } catch (IOException ex) {
             Logger.getLogger(Imagen.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
         int ancho = bf.getWidth();
         int alto = bf.getHeight();
         int escalaAncho = (int)(porcentaje* ancho);
