@@ -1,7 +1,7 @@
-
 package src;
 
 import RNA.RNAPerceptron;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
@@ -9,8 +9,14 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -21,37 +27,38 @@ import javax.swing.ListModel;
  * @author Luis Benitez
  */
 public class Interfaz extends javax.swing.JFrame {
+
     Graphics paint;
     Graphics2D paint2d;
     Graphics2D paint2dt;
     RNAPerceptron rna;
     BufferedImage bufferPanelDibujo;
     ArrayList<figuraAgregada> registro;
-    int AnchoFigura = 200;int AltoFigura = 200;
+    int AnchoFigura = 200;
+    int AltoFigura = 200;
     int[] contador;
-    
-   
-    
+
     //Constructor
     public Interfaz(ListModel jList) {
         initComponents();
-        
+
         ReiniciarBuffer();  //Reinicia el bufferPanelDibujo para guardar lo que se dibuja en el paneldibujo para luego binarizar
         ListaFormas.setModel(jList);    //Nos lista las formas que recibimos de la pantalla anterior
         CrearRNA();
-        EntrenamientoInicial();
-               
+        //EntrenamientoInicial();
+        //ObtenerPesos_Serializable();
+
         setLocationRelativeTo(null);
         this.setVisible(true);
     }
 
     //Metodos
-    private void ReiniciarBuffer(){
+    private void ReiniciarBuffer() {
         bufferPanelDibujo = new BufferedImage(800, 500, BufferedImage.TYPE_INT_RGB);
         paint2dt = (Graphics2D) bufferPanelDibujo.getGraphics();
         registro = new ArrayList<>();
     }
-    
+
     private void MostrarPreview() {
 
         Graphics grafico = PanelPreview.getGraphics();
@@ -91,70 +98,91 @@ public class Interfaz extends javax.swing.JFrame {
             case "Trapecio":
                 poligono = figura.Trapecio();
                 g2d.drawPolygon(poligono);
-                PanelDibujo.paintComponents(g2d);
+                PanelPreview.paintComponents(g2d);
                 break;
             case "Hexagono":
                 poligono = figura.Hexagono();
                 g2d.drawPolygon(poligono);
-                PanelDibujo.paintComponents(g2d);
+                PanelPreview.paintComponents(g2d);
                 break;
             default:
 
         }
 
     }
-    
-    private void GenerarFormas(){
-        int x,y;
-        
+
+    private void GenerarFormas() {
+        int x, y;
+
         for (int i = 0; i < ListaFormas.getModel().getSize(); i++) {
-            x= ((int)(Math.random()*PanelDibujo.getWidth())); 
-            y= ((int)(Math.random()*PanelDibujo.getHeight())); 
-            if(x>600)x=590;
-            if(y>300)y=290;   
-            InsertarForma(ListaFormas.getModel().getElementAt(i),x,y);
-        }               
+            x = ((int) (Math.random() * PanelDibujo.getWidth()));
+            y = ((int) (Math.random() * PanelDibujo.getHeight()));
+            if (x > 600) {
+                x = 590;
+            }
+            if (y > 300) {
+                y = 290;
+            }
+            InsertarForma(ListaFormas.getModel().getElementAt(i), x, y);
+        }
     }
-    
-    private void InsertarForma(String forma,int x, int y){
+
+    private void InsertarForma(String forma, int x, int y) {
         paint = this.PanelDibujo.getGraphics();
         paint2d = (Graphics2D) paint;
-        paint2dt = (Graphics2D) bufferPanelDibujo.getGraphics();        
+        paint2dt = (Graphics2D) bufferPanelDibujo.getGraphics();
 
-        x-=(x%5);
-        y-=(y%5);
-        if(x<0)x=5;if(x>600)x=595;
-        if(y<0)y=5;if(y>300)y=295;
-        if (forma.equals("Elipse") && y==5)y=0;        //Puramente estetico con cordenadas >=0 y <=300 no hay errores
-        if (forma.equals("Rectangulo") && y==5)y=0;    //Puramente estetico    
-        if (forma.equals("Elipse") && y==295)y=300;     //Puramente estetico
-        if (forma.equals("Rectangulo") && y==295)y=300; //Puramente estetico
-        
-        
+        x -= (x % 7);
+        y -= (y % 7);
+        if (x < 0) {
+            x = 7;
+        }
+        if (x > 600) {
+            x = 593;
+        }
+        if (y < 0) {
+            y = 7;
+        }
+        if (y > 300) {
+            y = 293;
+        }
+        if (forma.equals("Elipse") && y == 7) {
+            y = 0;        //Puramente estetico con cordenadas >=0 y <=300 no hay errores
+        }
+        if (forma.equals("Rectangulo") && y == 7) {
+            y = 0;    //Puramente estetico    
+        }
+        if (forma.equals("Elipse") && y == 293) {
+            y = 300;     //Puramente estetico
+        }
+        if (forma.equals("Rectangulo") && y == 293) {
+            y = 300; //Puramente estetico
+        }
+
         //registramos las figuras agregadas, el nombre, coordenadas 
-        registro.add(new figuraAgregada(forma,x,y));
-        
+        registro.add(new figuraAgregada(forma, x, y));
+
         switch (forma) {
             case "Cuadradro":
-                paint2d.draw(new Rectangle2D.Double(x,y,200,200));
-                paint2dt.draw(new Rectangle2D.Double(x,y,200,200));
+                paint2d.draw(new Rectangle2D.Double(x, y, 200, 200));
+                paint2dt.draw(new Rectangle2D.Double(x, y, 200, 200));
                 PanelDibujo.paintComponents(paint2d);
-            break;
+                break;
             case "Rectangulo":
-                paint2d.draw(new Rectangle2D.Double(x,y+25,200,150));
-                paint2dt.draw(new Rectangle2D.Double(x,y+25,200,150));
+                paint2d.draw(new Rectangle2D.Double(x, y + 25, 200, 150));
+                paint2dt.draw(new Rectangle2D.Double(x, y + 25, 200, 150));
                 PanelDibujo.paintComponents(paint2d);
-            break;
+                break;
             case "Elipse":
-                paint2d.draw(new Ellipse2D.Double(x,y+25,200,150));
-                paint2dt.draw(new Ellipse2D.Double(x,y+25,200,150));
+                paint2d.draw(new Ellipse2D.Double(x, y + 25, 200, 150));
+                paint2dt.draw(new Ellipse2D.Double(x, y + 25, 200, 150));
                 PanelDibujo.paintComponents(paint2d);
-            break;
+                break;
             case "Circulo":
-                paint2d.draw(new Ellipse2D.Double(x,y,200,200));
-                paint2dt.draw(new Ellipse2D.Double(x,y,200,200));
+                paint2d.draw(new Ellipse2D.Double(x, y, 200, 200));
+                paint2dt.draw(new Ellipse2D.Double(x, y, 200, 200));
                 PanelDibujo.paintComponents(paint2d);
-            break;
+                break;
             case "Triangulo":
                 int xp[] = {x, x + 100, x + 200};
                 int yp[] = {y + 200, y, y + 200};
@@ -177,16 +205,22 @@ public class Interfaz extends javax.swing.JFrame {
                 PanelDibujo.paintComponents(paint2d);
                 break;
             default:
-                
+
         }
-        
+
     }
-    
-    private void RecolectarEntradas(){
+
+    private void RecolectarEntradas() {
+        contador = new int[rna.getCapas().get(0).getNeuronas().size()];
         
-        for (int i = 0; i < PanelDibujo.getHeight()-200 ; i+=5) {
-            for (int j = 0; j < PanelDibujo.getWidth()-200; j+=5) {                                
+        Rectangle2D rectangulo;
+        for (int i = 0; i < PanelDibujo.getHeight()- 200; i += 7) {
+            for (int j = 0; j < PanelDibujo.getWidth()- 200; j += 7) {
+                rectangulo = new Rectangle2D.Double(j, i, 200, 200);
+                paint2d.draw(rectangulo);
+                PanelDibujo.paintComponents(paint2d);
                 rna.CalcularSalida(bufferPanelDibujo.getSubimage(j, i, AnchoFigura, AltoFigura));
+                System.out.println(rna.ObtenerSalida());
                 contar();
             }
         }
@@ -195,53 +229,51 @@ public class Interfaz extends javax.swing.JFrame {
             System.out.println(contador[i]);
         }
     }
-    
-    private void contar(){
+
+    private void contar() {
         for (int i = 0; i < rna.getCapas().get(0).getNeuronas().size(); i++) {
             if (rna.getCapas().get(0).getNeuronas().get(i).getY() == 1) {
                 contador[i]++;
             }
-            
+
         }
-        
+
     }
-    
-    private void CargarImagen(){
+
+    private void CargarImagen() {
         JFileChooser file = new JFileChooser();
         file.showOpenDialog(this);
-        
-        
-        if (file.getSelectedFile()!=null) {
+
+        if (file.getSelectedFile() != null) {
             paint = this.PanelDibujo.getGraphics();
             paint2d = (Graphics2D) paint;
             try {
                 BufferedImage imagen = ImageIO.read(file.getSelectedFile());
-                bufferPanelDibujo= imagen;
+                bufferPanelDibujo = imagen;
                 paint2d.drawImage(imagen, 0, 0, PanelDibujo.getWidth(), PanelDibujo.getHeight(), null);
                 PanelDibujo.paintComponents(paint2d);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, "Problemas al abrir el archivo");
             }
-     
-            
+
         }
     }
-    
-    private void GuardarImagenPNG(BufferedImage buffer,String nombre){
+
+    private void GuardarImagenPNG(BufferedImage buffer, String nombre) {
         try {
-            ImageIO.write(buffer, "png", new File(nombre+".png"));
+            ImageIO.write(buffer, "png", new File(nombre + ".png"));
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, ex);
         }
     }
-    
-    private void CrearRNA(){
-        rna = new RNAPerceptron(0,1);   //Instanciamos la clase de la RNA con umbral 0 y alfa 1
+
+    private void CrearRNA() {
+        rna = new RNAPerceptron(0, 1);   //Instanciamos la clase de la RNA con umbral 0 y alfa 1
         rna.CrearCapa(ListaFormas.getModel().getSize());    //Ocupamos una capa por lo que un llamado a la funcion con el tamaño de la lista
-                                                            //como parametro para crear las neuronas necesarias 
+        //como parametro para crear las neuronas necesarias 
     }
-            
-    private void EntrenarRNA(){
+
+    private void EntrenarRNA() {
         ArrayList<BufferedImage> buffer = new ArrayList<>();
         for (int i = 0; i < registro.size(); i++) {
             buffer.add(bufferPanelDibujo.getSubimage(
@@ -252,88 +284,142 @@ public class Interfaz extends javax.swing.JFrame {
         }
 //        rna.IniciarEntrenamiento(buffer);
     }
-    
-    private void EntrenamientoInicial(){
+
+    private void EntrenamientoInicial() {
         //Unicamente para este proyecto, despues de entrenarlo y guardar los pesos puede desaparecer
         ArrayList<BufferedImage> arrayFigurasTotales = new ArrayList<>();
         ArrayList<BufferedImage> arrayFigurasNoTotales = new ArrayList<>();
         BufferedImage bf;
         for (int m = 0; m < ListaFormas.getModel().getSize(); m++) {
-            bf = new BufferedImage(600,600,BufferedImage.TYPE_INT_RGB);
-            guardarEnBuffer(ListaFormas.getModel().getElementAt(m),bf.getGraphics(),false);
-            arrayFigurasTotales.add(bf.getSubimage(200, 200, 200, 200));
+            bf = new BufferedImage(214, 214, BufferedImage.TYPE_INT_RGB);
+            guardarEnBuffer(ListaFormas.getModel().getElementAt(m), bf.getGraphics(), false);
             
-//            for (int i = 0; i < 200; i++) {
-//                for (int j = 0; j < 400; j++) {
-//                    arrayFigurasNoTotales.add(bf.getSubimage(j, i, 200, 200));
-//                }
-//            }
-//            
-//            for (int i = 201; i < 400; i++) {
-//                for (int j = 0; j < 400; j++) {
-//                    arrayFigurasNoTotales.add(bf.getSubimage(j, i, 200, 200));
-//                }
-//            }
+            arrayFigurasTotales.add(bf.getSubimage(7, 7, 200, 200));
             
-        }        
-        rna.EntrenamientoInicial(arrayFigurasTotales,1);
-        rna.EntrenamientoInicial(arrayFigurasTotales,1);
-//        rna.EntrenamientoInicial(arrayFigurasNoTotales,0);
-        
+            
+            for (int i = 0; i < 7; i++) {
+                for (int j = 0; j < 14; j++) {
+                    arrayFigurasNoTotales.add(bf.getSubimage(j, i, 200, 200));
+                }
+            }
+            
+            for (int i = 8; i < 14; i++) {
+                for (int j = 0; j < 14; j++) {
+                    arrayFigurasNoTotales.add(bf.getSubimage(j, i, 200, 200));
+                }
+            }
+            
+            for (int i = 0; i < 7; i++) {
+                arrayFigurasNoTotales.add(bf.getSubimage(i, 7, 200, 200));
+            }
+            
+            for (int i = 8; i < 14; i++) {
+                arrayFigurasNoTotales.add(bf.getSubimage(i, 7, 200, 200));
+            }
+        }
+          rna.EntrenamientoInicial(arrayFigurasNoTotales, 0);
+          rna.EntrenamientoInicial(arrayFigurasNoTotales, 0);
+            rna.EntrenamientoInicial(arrayFigurasTotales, 1);
+       rna.EntrenamientoInicial(arrayFigurasTotales,1);
+      
+
     }
-    
-    private void CheckLastAdded(){
-        if (!registro.isEmpty()) {
-            rna.CalcularSalida(bufferPanelDibujo.getSubimage(
-                registro.get(registro.size()-1).getX(),
-                registro.get(registro.size()-1).getY(),
-                200,
-                200));
-        JOptionPane.showMessageDialog(this, rna.ObtenerSalida());
+
+    private void GuardarPesos_Serializable() {
+        try {
+
+            for (int j = 0; j < rna.getCapas().get(0).getNeuronas().size(); j++) {
+                System.out.println("------------------------------NEURONA " + j + "-----------------------------------------------");
+                ObjectOutputStream escribiendo_Pesos = new ObjectOutputStream(new FileOutputStream("pesosPrueba" + j + ".dat"));
+                escribiendo_Pesos.writeObject(rna.getCapas().get(0).getNeuronas().get(j).getPesos());
+                escribiendo_Pesos.close();
+
+                ObjectInputStream recuperando_Pesos = new ObjectInputStream(new FileInputStream("pesosPrueba" + j + ".dat"));
+                ArrayList<Float> pesosRecuperados = (ArrayList<Float>) recuperando_Pesos.readObject();
+                recuperando_Pesos.close();
+
+                for (int i = 0; i < pesosRecuperados.size(); i++) {
+                    System.out.println("W" + i + ": " + pesosRecuperados.get(i));
+                }
+            }
+
+        } catch (Exception e) {
         }
     }
-    
-    private void CheckAllForms(){
-         //Unicamente para este proyecto, despues de entrenarlo y guardar los pesos puede desaparecer
+
+    private void ObtenerPesos_Serializable() {
+        try {
+
+            for (int j = 0; j < rna.getCapas().get(0).getNeuronas().size(); j++) {
+
+                ObjectInputStream recuperando_Pesos = new ObjectInputStream(new FileInputStream("pesosPrueba" + j + ".dat"));
+                ArrayList<Float> pesosRecuperados = (ArrayList<Float>) recuperando_Pesos.readObject();
+                recuperando_Pesos.close();
+                
+                rna.getCapas().get(0).getNeuronas().get(j).setPesos(pesosRecuperados);
+                
+                for (int i = 0; i < pesosRecuperados.size(); i++) {
+                    
+                    System.out.println("W" + i + ": " + pesosRecuperados.get(i));
+                }
+            }
+
+        } catch (Exception e) {
+        }
+    }
+
+    private void CheckLastAdded() {
+        if (!registro.isEmpty()) {
+            rna.CalcularSalida(bufferPanelDibujo.getSubimage(
+                    registro.get(registro.size() - 1).getX(),
+                    registro.get(registro.size() - 1).getY(),
+                    200,
+                    200));
+            JOptionPane.showMessageDialog(this, rna.ObtenerSalida());
+        }
+    }
+
+    private void CheckAllForms() {
+        //Unicamente para este proyecto, despues de entrenarlo y guardar los pesos puede desaparecer
         ArrayList<BufferedImage> arrayFigurasTotales = new ArrayList<>();
         BufferedImage bf;
         for (int i = 0; i < ListaFormas.getModel().getSize(); i++) {
-            bf = new BufferedImage(200,200,BufferedImage.TYPE_INT_RGB);
-            guardarEnBuffer(ListaFormas.getModel().getElementAt(i),bf.getGraphics(),true);
+            bf = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+            guardarEnBuffer(ListaFormas.getModel().getElementAt(i), bf.getGraphics(), true);
             arrayFigurasTotales.add(bf);
-        }  
+        }
         for (int i = 0; i < arrayFigurasTotales.size(); i++) {
-             rna.CalcularSalida(arrayFigurasTotales.get(i));
-            JOptionPane.showMessageDialog(this, ListaFormas.getModel().getElementAt(i)+"\n"+rna.ObtenerSalida());
+            rna.CalcularSalida(arrayFigurasTotales.get(i));
+            JOptionPane.showMessageDialog(this, ListaFormas.getModel().getElementAt(i) + "\n" + rna.ObtenerSalida());
         }
-        
+
     }
-    
-    private void guardarEnBuffer(String forma, Graphics graphicsbuffer,boolean init){
+
+    private void guardarEnBuffer(String forma, Graphics graphicsbuffer, boolean init) {
         Graphics g = graphicsbuffer;
-        Graphics2D g2d = (Graphics2D) g;  
-        int x=200;
-        int y=200;
-        if(init){
-             x=0;
-             y=0;
-        }else{
-            
+        Graphics2D g2d = (Graphics2D) g;
+        int x = 7;
+        int y = 7;
+        if (init) {
+            x = 0;
+            y = 0;
+        } else {
+
         }
-        
+
         switch (forma) {
             case "Cuadradro":
-                g2d.draw(new Rectangle2D.Double(x,y,200,200));                
-            break;
+                g2d.draw(new Rectangle2D.Double(x, y, 200, 200));
+                break;
             case "Rectangulo":
-                g2d.draw(new Rectangle2D.Double(x,y+25,200,150));
-            break;
+                g2d.draw(new Rectangle2D.Double(x, y + 25, 200, 150));
+                break;
             case "Elipse":
-                g2d.draw(new Ellipse2D.Double(x,y+25,200,150));
-            break;
+                g2d.draw(new Ellipse2D.Double(x, y + 25, 200, 150));
+                break;
             case "Circulo":
-                g2d.draw(new Ellipse2D.Double(x,y,200,200));
-            break;
+                g2d.draw(new Ellipse2D.Double(x, y, 200, 200));
+                break;
             case "Triangulo":
                 int xp[] = {x, x + 100, x + 200};
                 int yp[] = {y + 200, y, y + 200};
@@ -350,17 +436,18 @@ public class Interfaz extends javax.swing.JFrame {
                 g2d.draw(new Polygon(xc, yd, 6));
                 break;
             default:
-                
+
         }
-        
+
     }
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
         PanelDibujo = new javax.swing.JPanel();
+        jLayeredPane1 = new javax.swing.JLayeredPane();
         PanelMenu = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         ListaFormas = new javax.swing.JList<>();
@@ -402,15 +489,32 @@ public class Interfaz extends javax.swing.JFrame {
             }
         });
 
+        jLayeredPane1.setPreferredSize(new java.awt.Dimension(800, 500));
+
+        javax.swing.GroupLayout jLayeredPane1Layout = new javax.swing.GroupLayout(jLayeredPane1);
+        jLayeredPane1.setLayout(jLayeredPane1Layout);
+        jLayeredPane1Layout.setHorizontalGroup(
+            jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 800, Short.MAX_VALUE)
+        );
+        jLayeredPane1Layout.setVerticalGroup(
+            jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 489, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout PanelDibujoLayout = new javax.swing.GroupLayout(PanelDibujo);
         PanelDibujo.setLayout(PanelDibujoLayout);
         PanelDibujoLayout.setHorizontalGroup(
             PanelDibujoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 800, Short.MAX_VALUE)
+            .addGroup(PanelDibujoLayout.createSequentialGroup()
+                .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         PanelDibujoLayout.setVerticalGroup(
             PanelDibujoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 500, Short.MAX_VALUE)
+            .addGroup(PanelDibujoLayout.createSequentialGroup()
+                .addComponent(jLayeredPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 489, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         ListaFormas.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
@@ -457,6 +561,11 @@ public class Interfaz extends javax.swing.JFrame {
             }
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 jButton4MouseReleased(evt);
+            }
+        });
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
             }
         });
 
@@ -544,11 +653,26 @@ public class Interfaz extends javax.swing.JFrame {
         );
 
         jMenu1.setText("Archivo");
+        jMenu1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenu1ActionPerformed(evt);
+            }
+        });
 
         jmGuardar.setText("Guardar Pesos w");
+        jmGuardar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmGuardarActionPerformed(evt);
+            }
+        });
         jMenu1.add(jmGuardar);
 
         jmCargar.setText("Cargar Pesos w");
+        jmCargar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmCargarActionPerformed(evt);
+            }
+        });
         jMenu1.add(jmCargar);
 
         jmSalir.setText("Salir");
@@ -616,9 +740,9 @@ public class Interfaz extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void ListaFormasValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_ListaFormasValueChanged
-        if(evt.getValueIsAdjusting()){
+        if (evt.getValueIsAdjusting()) {
             PanelPreview.repaint();
-        }else{
+        } else {
             MostrarPreview();
         }
     }//GEN-LAST:event_ListaFormasValueChanged
@@ -633,25 +757,52 @@ public class Interfaz extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton4MousePressed
 
     private void PanelDibujoMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_PanelDibujoMousePressed
-        if(!ListaFormas.isSelectionEmpty() && evt.getButton()==1){
-            InsertarForma(ListaFormas.getSelectedValue(),evt.getX()-100,evt.getY()-100);
+        if (!ListaFormas.isSelectionEmpty() && evt.getButton() == 1) {
+            InsertarForma(ListaFormas.getSelectedValue(), evt.getX() - 100, evt.getY() - 100);
         }
-        if(evt.getButton()==3 && evt.getClickCount()>1){
+        if (evt.getButton() == 3 && evt.getClickCount() > 1) {
             PanelDibujo.repaint();
             ReiniciarBuffer();
-            registro=new ArrayList<>();
+            registro = new ArrayList<>();
         }
     }//GEN-LAST:event_PanelDibujoMousePressed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        contador=new int[ListaFormas.getModel().getSize()];
-        RecolectarEntradas();
+//        Rectangle2D rectangulo;
+this.RecolectarEntradas();
+//        BufferedImage bf;
+//        contador = new int[rna.getCapas().get(0).getNeuronas().size()];
+//        for (int i = 0; i < bufferPanelDibujo.getHeight() - 200; i += 5) {
+//            for (int j = 0; j < bufferPanelDibujo.getWidth() - 200; j += 5) {
+//
+//                try {
+//
+//                    rectangulo = new Rectangle2D.Double(j, i, 200, 200);
+//                    paint2d.setPaint(Color.blue);
+//                    paint2d.draw(rectangulo);
+//
+//                    PanelDibujo.paintComponents(paint2d);
+////                    jLayeredPane1.paintComponents(paint2d);
+//
+////                    bf = bufferPanelDibujo.getSubimage(j, i, AnchoFigura, AltoFigura);
+//
+//                    this.RecolectarEntradas();
+//                    
+//                    Thread.sleep(5);
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(Interfaz.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//
+//            }
+//        }
+        PanelDibujo.repaint();
+        PanelDibujo.paint(bufferPanelDibujo.getGraphics());
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MousePressed
         PanelDibujo.repaint();
         ReiniciarBuffer();
-        registro=new ArrayList<>();
+        registro = new ArrayList<>();
     }//GEN-LAST:event_jButton1MousePressed
 
     private void jButton1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseReleased
@@ -660,40 +811,40 @@ public class Interfaz extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 //        this.RecolectarEntradas();
-    this.InsertarForma("Circulo", 0, 0);
-        System.out.println("Prueba Figura 1");
-        rna.CalcularSalida(bufferPanelDibujo.getSubimage(0, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
-        System.out.println("Prueba Figura 2");
-        rna.CalcularSalida(bufferPanelDibujo.getSubimage(1, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
-        System.out.println("Prueba Figura 3");
-        rna.CalcularSalida(bufferPanelDibujo.getSubimage(2, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
-        System.out.println("Prueba Figura 4");
-        rna.CalcularSalida(bufferPanelDibujo.getSubimage(3, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
-        System.out.println("Prueba Figura 5");
-        rna.CalcularSalida(bufferPanelDibujo.getSubimage(4, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
-        System.out.println("Prueba Figura 6");
-        rna.CalcularSalida(bufferPanelDibujo.getSubimage(5, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
-        System.out.println("Prueba Figura 7");
-        rna.CalcularSalida(bufferPanelDibujo.getSubimage(6, 0, 200, 200));
-        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
-        System.out.println("Prueba Figura 7");
-        rna.CalcularSalida(bufferPanelDibujo.getSubimage(1, 2, 200, 200));
-        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
-        System.out.println("Prueba Figura 7");
-        rna.CalcularSalida(bufferPanelDibujo.getSubimage(2, 1, 200, 200));
-        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
-        System.out.println("Prueba Figura 7");
-        rna.CalcularSalida(bufferPanelDibujo.getSubimage(3, 1, 200, 200));
-        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
-        System.out.println("Prueba Figura 7");
-        rna.CalcularSalida(bufferPanelDibujo.getSubimage(4, 1, 200, 200));
-        System.out.println(rna.getCapas().get(0).getNeuronas().get(0).getY());
+          EntrenamientoInicial();
+
+//        Rectangle2D rectangulo;
+//        ArrayList<BufferedImage> FigurasTotales = new ArrayList<>();
+//
+//        BufferedImage bf;
+//
+//        for (int i = 0; i < bufferPanelDibujo.getHeight() - 200; i += 5) {
+//            for (int j = 0; j < bufferPanelDibujo.getWidth() - 200; j += 5) {
+//
+//                try {
+//
+//                    rectangulo = new Rectangle2D.Double(j, i, 200, 200);
+//                    paint2d.setPaint(Color.RED);
+//                    paint2d.draw(rectangulo);
+//
+//                    jLayeredPane1.paintComponents(paint2d);
+//                    //PanelDibujo.paintComponents(paint2d);
+//
+//                    bf = bufferPanelDibujo.getSubimage(j, i, AnchoFigura, AltoFigura);
+//                    //String nombre = "bla" + i + j;
+//                    //GuardarImagenPNG(bf, nombre);
+//                    FigurasTotales.add(bf);
+//                    Thread.sleep(5);
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(Interfaz.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//
+//            }
+//        }
+//        rna.EntrenamientoInicial(FigurasTotales, 0);
+//        EntrenamientoInicial();
+//        GuardarPesos_Serializable();
+        
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
@@ -703,6 +854,22 @@ public class Interfaz extends javax.swing.JFrame {
     private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
         CheckAllForms();
     }//GEN-LAST:event_jMenuItem5ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jmGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmGuardarActionPerformed
+        this.GuardarPesos_Serializable();
+    }//GEN-LAST:event_jmGuardarActionPerformed
+
+    private void jmCargarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmCargarActionPerformed
+        this.ObtenerPesos_Serializable();
+    }//GEN-LAST:event_jmCargarActionPerformed
+
+    private void jMenu1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenu1ActionPerformed
+        
+    }//GEN-LAST:event_jMenu1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -750,6 +917,7 @@ public class Interfaz extends javax.swing.JFrame {
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JLayeredPane jLayeredPane1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
@@ -769,4 +937,3 @@ public class Interfaz extends javax.swing.JFrame {
     private javax.swing.JMenuItem jmSalir;
     // End of variables declaration//GEN-END:variables
 }
-
